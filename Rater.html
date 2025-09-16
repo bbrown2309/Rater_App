@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Rater App with Tags</title>
+<title>Rater App with Tags & Search</title>
 <style>
   body { font-family: sans-serif; margin: 0; padding: 0; background: #f4f4f4; }
   header { background: #333; color: white; padding: 1rem; text-align: center; }
@@ -20,6 +20,9 @@
   .edit-btn { background: #4caf50; color: white; }
   .delete-btn { background: #e53935; color: white; }
   .tag { display: inline-block; background: #2196f3; color: white; padding: 0.2rem 0.5rem; border-radius: 4px; margin-right: 0.3rem; margin-top: 0.3rem; }
+  .filter-bar { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+  .filter-bar input { flex: 1; padding: 0.5rem; border: 1px solid #ccc; border-radius: 6px; }
+  .filter-bar button { background: #333; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -30,6 +33,13 @@
 </nav>
 
 <div class="container">
+  <!-- Search/Filter -->
+  <div class="filter-bar">
+    <input type="text" id="searchInput" placeholder="Search by name or tag">
+    <button id="clearFilterBtn">Clear Filter</button>
+  </div>
+
+  <!-- Add/Edit Item Form -->
   <div class="card">
     <h2 id="formTitle">Add Item</h2>
     <input id="itemName" type="text" placeholder="Item name (e.g., Interstellar)">
@@ -59,13 +69,15 @@
   const newTagInput = document.getElementById("newTagInput");
   const existingTagsSelect = document.getElementById("existingTags");
   const saveBtn = document.getElementById("saveBtn");
+  const searchInput = document.getElementById("searchInput");
+  const clearFilterBtn = document.getElementById("clearFilterBtn");
 
   let ratedItems = JSON.parse(localStorage.getItem("ratedItems")) || [];
   let wantItems = JSON.parse(localStorage.getItem("wantItems")) || [];
   let tags = JSON.parse(localStorage.getItem("tags")) || [];
-
   let editId = null;
   let editType = null;
+  let searchTerm = "";
 
   function normalizeItems() {
     ratedItems = ratedItems.map(item => {
@@ -80,7 +92,6 @@
     });
     updateGlobalTags();
   }
-
   normalizeItems();
 
   function updateGlobalTags() {
@@ -170,42 +181,60 @@
     renderLists();
   }
 
-  function renderLists() {
-    function escapeHtml(text) {
-      return text.replace(/[&<>"']/g, function(m) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; });
-    }
+  function escapeHtml(text) {
+    return text.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
 
+  function renderLists() {
     function renderList(el, items, type) {
       el.innerHTML = "";
-      items.forEach(item => {
-        const div = document.createElement("div");
-        div.className = "card";
-        div.innerHTML = `<strong>${escapeHtml(item.name)}</strong><br>
-          ${item.tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join(" ")}<br>
-          ${item.rating ? `<span class="rating">${escapeHtml(item.rating)}</span><br>` : ""}
-          <em>${escapeHtml(item.comment || "")}</em>`;
-        const actions = document.createElement("div");
-        actions.className = "actions";
-        const editBtn = document.createElement("button");
-        editBtn.className = "edit-btn";
-        editBtn.textContent = "✏️ Edit";
-        editBtn.addEventListener("click", () => editItem(type, item.id));
-        const deleteBtn = document.createElement("button");
-        deleteBtn.className = "delete-btn";
-        deleteBtn.textContent = "🗑 Delete";
-        deleteBtn.addEventListener("click", () => deleteItem(type, item.id));
-        actions.appendChild(editBtn);
-        actions.appendChild(deleteBtn);
-        div.appendChild(actions);
-        el.appendChild(div);
-      });
+      items
+        .filter(item => {
+          if (!searchTerm) return true;
+          const lowerTerm = searchTerm.toLowerCase();
+          const nameMatch = item.name.toLowerCase().includes(lowerTerm);
+          const tagMatch = item.tags.some(t => t.toLowerCase().includes(lowerTerm));
+          return nameMatch || tagMatch;
+        })
+        .forEach(item => {
+          const div = document.createElement("div");
+          div.className = "card";
+          div.innerHTML = `<strong>${escapeHtml(item.name)}</strong><br>
+            ${item.tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join(" ")}<br>
+            ${item.rating ? `<span class="rating">${escapeHtml(item.rating)}</span><br>` : ""}
+            <em>${escapeHtml(item.comment || "")}</em>`;
+          const actions = document.createElement("div");
+          actions.className = "actions";
+          const editBtn = document.createElement("button");
+          editBtn.className = "edit-btn";
+          editBtn.textContent = "✏️ Edit";
+          editBtn.addEventListener("click", () => editItem(type, item.id));
+          const deleteBtn = document.createElement("button");
+          deleteBtn.className = "delete-btn";
+          deleteBtn.textContent = "🗑 Delete";
+          deleteBtn.addEventListener("click", () => deleteItem(type, item.id));
+          actions.appendChild(editBtn);
+          actions.appendChild(deleteBtn);
+          div.appendChild(actions);
+          el.appendChild(div);
+        });
     }
-
     renderList(ratedListEl, ratedItems, "rated");
     renderList(wantListEl, wantItems, "want");
   }
 
   saveBtn.addEventListener("click", saveItem);
+
+  searchInput.addEventListener("input", () => {
+    searchTerm = searchInput.value.trim();
+    renderLists();
+  });
+
+  clearFilterBtn.addEventListener("click", () => {
+    searchTerm = "";
+    searchInput.value = "";
+    renderLists();
+  });
 
   renderLists();
   renderTagDropdown();
