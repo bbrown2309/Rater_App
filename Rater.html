@@ -1,405 +1,214 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Rater App</title>
-  <style>
-    body { font-family: sans-serif; margin: 0; padding: 0; background: #f4f4f4; }
-    header { background: #333; color: white; padding: 1rem; text-align: center; }
-    nav { display: flex; justify-content: center; margin: 1rem 0; }
-    nav button { margin: 0 0.5rem; padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: pointer; }
-    nav button.active { background: #333; color: white; }
-    .container { padding: 1rem; }
-    .card { background: white; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    input, select, textarea { width: 100%; margin-top: 0.5rem; margin-bottom: 1rem; padding: 0.5rem; border: 1px solid #ccc; border-radius: 6px; }
-    button.save { background: #333; color: white; padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: pointer; }
-    .rating { color: gold; }
-    .actions { margin-top: 0.5rem; }
-    .actions button { margin-right: 0.5rem; padding: 0.3rem 0.7rem; border: none; border-radius: 6px; cursor: pointer; }
-    .edit-btn { background: #4caf50; color: white; }
-    .delete-btn { background: #e53935; color: white; }
-    .cat-btn { background: #2196f3; color: white; }
-    .filter-bar { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
-    .filter-bar input { flex: 1; }
-    .filter-bar button { background: #333; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Rater App with Tags</title>
+<style>
+  body { font-family: sans-serif; margin: 0; padding: 0; background: #f4f4f4; }
+  header { background: #333; color: white; padding: 1rem; text-align: center; }
+  nav { display: flex; justify-content: center; margin: 1rem 0; }
+  nav button { margin: 0 0.5rem; padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: pointer; }
+  nav button.active { background: #333; color: white; }
+  .container { padding: 1rem; }
+  .card { background: white; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+  input, select, textarea { width: 100%; margin-top: 0.5rem; margin-bottom: 1rem; padding: 0.5rem; border: 1px solid #ccc; border-radius: 6px; }
+  button.save { background: #333; color: white; padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: pointer; }
+  .rating { color: gold; }
+  .actions { margin-top: 0.5rem; }
+  .actions button { margin-right: 0.5rem; padding: 0.3rem 0.7rem; border: none; border-radius: 6px; cursor: pointer; }
+  .edit-btn { background: #4caf50; color: white; }
+  .delete-btn { background: #e53935; color: white; }
+  .tag { display: inline-block; background: #2196f3; color: white; padding: 0.2rem 0.5rem; border-radius: 4px; margin-right: 0.3rem; margin-top: 0.3rem; }
+</style>
 </head>
 <body>
-  <header><h1>⭐ Rater App ⭐</h1></header>
-  <nav>
-    <button id="ratedTab" class="active">Rated</button>
-    <button id="wantTab">Want to Try</button>
-  </nav>
+<header><h1>⭐ Rater App ⭐</h1></header>
+<nav>
+  <button id="ratedTab" class="active">Rated</button>
+  <button id="wantTab">Want to Try</button>
+</nav>
 
-  <div class="container">
-    <!-- Add Item Form -->
-    <div class="card">
-      <h2 id="formTitle">Add Item</h2>
-      <input id="itemName" type="text" placeholder="Item name (e.g., Inception)">
-      <input id="newCategory" type="text" placeholder="Or type new category">
-      <select id="category"></select>
-      <select id="rating">
-        <option value="">No Rating (Want to Try)</option>
-        <option>1 ★</option>
-        <option>2 ★★</option>
-        <option>3 ★★★</option>
-        <option>4 ★★★★</option>
-        <option>5 ★★★★★</option>
-      </select>
-      <textarea id="comment" placeholder="Add a comment..."></textarea>
-      <button class="save" id="saveBtn">Save</button>
-    </div>
-
-    <!-- Filter Bar -->
-    <div class="filter-bar">
-      <input id="searchInput" type="text" placeholder="Search by name or comment..." />
-      <select id="filterCategory"><option value="">-- All Categories --</option></select>
-      <button id="clearFiltersBtn">Clear Filters</button>
-    </div>
-
-    <!-- Lists -->
-    <h2>Rated Items</h2>
-    <div id="ratedList"></div>
-    <h2>Want to Try</h2>
-    <div id="wantList"></div>
-
-    <!-- Category Manager -->
-    <h2>Manage Categories</h2>
-    <div id="categoryManager"></div>
+<div class="container">
+  <div class="card">
+    <h2 id="formTitle">Add Item</h2>
+    <input id="itemName" type="text" placeholder="Item name (e.g., Interstellar)">
+    <input id="newTagInput" type="text" placeholder="Add new tags, separated by commas">
+    <select id="existingTags" multiple size="4"></select>
+    <select id="rating">
+      <option value="">No Rating (Want to Try)</option>
+      <option>1 ★</option>
+      <option>2 ★★</option>
+      <option>3 ★★★</option>
+      <option>4 ★★★★</option>
+      <option>5 ★★★★★</option>
+    </select>
+    <textarea id="comment" placeholder="Add a comment..."></textarea>
+    <button class="save" id="saveBtn">Save</button>
   </div>
 
-  <script>
-    // Elements
-    const ratedListEl = document.getElementById("ratedList");
-    const wantListEl = document.getElementById("wantList");
-    const categorySelect = document.getElementById("category");
-    const newCategoryInput = document.getElementById("newCategory");
-    const categoryManager = document.getElementById("categoryManager");
-    const searchInput = document.getElementById("searchInput");
-    const filterCategory = document.getElementById("filterCategory");
-    const saveBtn = document.getElementById("saveBtn");
-    const clearFiltersBtn = document.getElementById("clearFiltersBtn");
+  <h2>Rated Items</h2>
+  <div id="ratedList"></div>
+  <h2>Want to Try</h2>
+  <div id="wantList"></div>
+</div>
 
-    // Load data
-    let ratedItems = JSON.parse(localStorage.getItem("ratedItems")) || [];
-    let wantItems = JSON.parse(localStorage.getItem("wantItems")) || [];
-    let categories = JSON.parse(localStorage.getItem("categories")) || [];
+<script>
+  const ratedListEl = document.getElementById("ratedList");
+  const wantListEl = document.getElementById("wantList");
+  const newTagInput = document.getElementById("newTagInput");
+  const existingTagsSelect = document.getElementById("existingTags");
+  const saveBtn = document.getElementById("saveBtn");
 
-    // Ensure items have stable ids and categories include used categories
-    function ensureIdsAndCategories() {
-      let changed = false;
-      ratedItems = ratedItems.map(it => {
-        if (!it.id) { it.id = 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); changed = true; }
-        return it;
-      });
-      wantItems = wantItems.map(it => {
-        if (!it.id) { it.id = 'w' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); changed = true; }
-        return it;
-      });
-      // collect used categories
-      const set = new Set(categories || []);
-      ratedItems.forEach(i => { if (i.category) set.add(i.category); });
-      wantItems.forEach(i => { if (i.category) set.add(i.category); });
-      categories = Array.from(set);
-      if (changed) {
-        localStorage.setItem("ratedItems", JSON.stringify(ratedItems));
-        localStorage.setItem("wantItems", JSON.stringify(wantItems));
-      }
-      localStorage.setItem("categories", JSON.stringify(categories));
+  let ratedItems = JSON.parse(localStorage.getItem("ratedItems")) || [];
+  let wantItems = JSON.parse(localStorage.getItem("wantItems")) || [];
+  let tags = JSON.parse(localStorage.getItem("tags")) || [];
+
+  let editId = null;
+  let editType = null;
+
+  function normalizeItems() {
+    ratedItems = ratedItems.map(item => {
+      if (!item.id) item.id = 'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+      if (!item.tags && item.category) item.tags = [item.category];
+      return item;
+    });
+    wantItems = wantItems.map(item => {
+      if (!item.id) item.id = 'w'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+      if (!item.tags && item.category) item.tags = [item.category];
+      return item;
+    });
+    updateGlobalTags();
+  }
+
+  normalizeItems();
+
+  function updateGlobalTags() {
+    const allTags = new Set(tags);
+    ratedItems.concat(wantItems).forEach(item => {
+      if (item.tags) item.tags.forEach(t => allTags.add(t));
+    });
+    tags = Array.from(allTags);
+    localStorage.setItem("tags", JSON.stringify(tags));
+    renderTagDropdown();
+  }
+
+  function renderTagDropdown() {
+    existingTagsSelect.innerHTML = "";
+    tags.forEach(t => {
+      const opt = document.createElement("option");
+      opt.value = t;
+      opt.textContent = t;
+      existingTagsSelect.appendChild(opt);
+    });
+  }
+
+  function saveItem() {
+    const name = document.getElementById("itemName").value.trim();
+    const comment = document.getElementById("comment").value.trim();
+    const rating = document.getElementById("rating").value;
+
+    let inputTags = newTagInput.value.split(",").map(t => t.trim()).filter(t => t);
+    const selectedTags = Array.from(existingTagsSelect.selectedOptions).map(o => o.value);
+    const itemTags = Array.from(new Set([...inputTags, ...selectedTags]));
+
+    if (!name) { alert("Enter an item name."); return; }
+    if (itemTags.length === 0) { alert("Enter at least one tag."); return; }
+
+    const item = {
+      id: editId || ('i'+Date.now().toString(36)+Math.random().toString(36).slice(2,8)),
+      name,
+      tags: itemTags,
+      rating: rating || null,
+      comment
+    };
+
+    if (editId) {
+      if (editType === "rated") ratedItems = ratedItems.filter(i => i.id !== editId);
+      else wantItems = wantItems.filter(i => i.id !== editId);
     }
 
-    ensureIdsAndCategories();
+    if (rating) ratedItems.push(item);
+    else wantItems.push(item);
 
-    // Editing state uses id + type
-    let editId = null;
-    let editType = null;
+    updateGlobalTags();
+    localStorage.setItem("ratedItems", JSON.stringify(ratedItems));
+    localStorage.setItem("wantItems", JSON.stringify(wantItems));
 
-    function updateCategoryDropdown() {
-      categorySelect.innerHTML = "<option value=''>-- Select Category --</option>";
-      filterCategory.innerHTML = "<option value=''>-- All Categories --</option>";
-      categories.forEach(cat => {
-        const opt = document.createElement("option");
-        opt.value = cat;
-        opt.textContent = cat;
-        categorySelect.appendChild(opt);
+    editId = null;
+    editType = null;
+    document.getElementById("formTitle").textContent = "Add Item";
+    document.getElementById("itemName").value = "";
+    newTagInput.value = "";
+    existingTagsSelect.selectedIndex = -1;
+    document.getElementById("rating").value = "";
+    document.getElementById("comment").value = "";
 
-        const fopt = document.createElement("option");
-        fopt.value = cat;
-        fopt.textContent = cat;
-        filterCategory.appendChild(fopt);
-      });
-      renderCategoryManager();
-    }
-
-    function generateId(prefix='i') {
-      return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
-    }
-
-    function saveItem() {
-      const name = document.getElementById("itemName").value.trim();
-      let category = categorySelect.value;
-      const newCat = newCategoryInput.value.trim();
-      const rating = document.getElementById("rating").value;
-      const comment = document.getElementById("comment").value.trim();
-
-      if (!name) { alert("Please enter an item name."); return; }
-
-      if (newCat) {
-        category = newCat;
-        if (!categories.includes(newCat)) {
-          categories.push(newCat);
-        }
-      }
-
-      if (!category) { alert("Please select or add a category."); return; }
-
-      // If editing an existing item
-      if (editId) {
-        if (editType === "rated") {
-          const idx = ratedItems.findIndex(i => i.id === editId);
-          if (idx === -1) { console.warn("Edited rated item not found"); }
-          else {
-            if (rating) {
-              // update in place
-              ratedItems[idx] = { id: editId, name, category, rating, comment };
-            } else {
-              // move to wantItems
-              // remove from rated and push to want
-              ratedItems.splice(idx, 1);
-              wantItems.push({ id: editId, name, category, comment });
-            }
-          }
-        } else {
-          // editing a want item
-          const idx = wantItems.findIndex(i => i.id === editId);
-          if (idx === -1) { console.warn("Edited want item not found"); }
-          else {
-            if (rating) {
-              // move to ratedItems
-              wantItems.splice(idx, 1);
-              ratedItems.push({ id: editId, name, category, rating, comment });
-            } else {
-              // update in place
-              wantItems[idx] = { id: editId, name, category, comment };
-            }
-          }
-        }
-
-        // save both lists
-        localStorage.setItem("ratedItems", JSON.stringify(ratedItems));
-        localStorage.setItem("wantItems", JSON.stringify(wantItems));
-
-        // reset edit state
-        editId = null;
-        editType = null;
-        document.getElementById("formTitle").textContent = "Add Item";
-      } else {
-        // new item
-        const id = generateId();
-        if (rating) {
-          ratedItems.push({ id, name, category, rating, comment });
-          localStorage.setItem("ratedItems", JSON.stringify(ratedItems));
-        } else {
-          wantItems.push({ id, name, category, comment });
-          localStorage.setItem("wantItems", JSON.stringify(wantItems));
-        }
-      }
-
-      // save categories (in case new one was added)
-      localStorage.setItem("categories", JSON.stringify(categories));
-      // clear form
-      document.getElementById("itemName").value = "";
-      newCategoryInput.value = "";
-      categorySelect.value = "";
-      document.getElementById("rating").value = "";
-      document.getElementById("comment").value = "";
-
-      renderLists();
-    }
-
-    function editItem(type, id) {
-      let item;
-      if (type === "rated") {
-        item = ratedItems.find(i => i.id === id);
-      } else {
-        item = wantItems.find(i => i.id === id);
-      }
-      if (!item) { alert("Item not found (it may have been deleted)."); return; }
-
-      document.getElementById("itemName").value = item.name || "";
-      document.getElementById("comment").value = item.comment || "";
-      document.getElementById("rating").value = type === "rated" ? (item.rating || "") : "";
-      // ensure category exists in dropdown; if not, add it so it selects properly
-      if (item.category && !categories.includes(item.category)) {
-        categories.push(item.category);
-        localStorage.setItem("categories", JSON.stringify(categories));
-        updateCategoryDropdown();
-      }
-      categorySelect.value = item.category || "";
-
-      editId = id;
-      editType = type;
-      document.getElementById("formTitle").textContent = "Edit Item";
-    }
-
-    function deleteItem(type, id) {
-      if (type === "rated") {
-        const idx = ratedItems.findIndex(i => i.id === id);
-        if (idx !== -1) ratedItems.splice(idx, 1);
-        localStorage.setItem("ratedItems", JSON.stringify(ratedItems));
-      } else {
-        const idx = wantItems.findIndex(i => i.id === id);
-        if (idx !== -1) wantItems.splice(idx, 1);
-        localStorage.setItem("wantItems", JSON.stringify(wantItems));
-      }
-      renderLists();
-    }
-
-    function renameCategory(oldCat, newCat) {
-      if (!newCat || categories.includes(newCat)) { alert("Invalid or duplicate category name."); return; }
-      categories = categories.map(c => c === oldCat ? newCat : c);
-      ratedItems = ratedItems.map(i => i.category === oldCat ? { ...i, category: newCat } : i);
-      wantItems = wantItems.map(i => i.category === oldCat ? { ...i, category: newCat } : i);
-
-      localStorage.setItem("categories", JSON.stringify(categories));
-      localStorage.setItem("ratedItems", JSON.stringify(ratedItems));
-      localStorage.setItem("wantItems", JSON.stringify(wantItems));
-      updateCategoryDropdown();
-      renderLists();
-    }
-
-    function deleteCategory(cat) {
-      if (!confirm(`Delete category "${cat}"? Items will become "Uncategorized".`)) return;
-      categories = categories.filter(c => c !== cat);
-      ratedItems = ratedItems.map(i => i.category === cat ? { ...i, category: "Uncategorized" } : i);
-      wantItems = wantItems.map(i => i.category === cat ? { ...i, category: "Uncategorized" } : i);
-      if (!categories.includes("Uncategorized")) categories.push("Uncategorized");
-
-      localStorage.setItem("categories", JSON.stringify(categories));
-      localStorage.setItem("ratedItems", JSON.stringify(ratedItems));
-      localStorage.setItem("wantItems", JSON.stringify(wantItems));
-      updateCategoryDropdown();
-      renderLists();
-    }
-
-    function promptRename(cat) {
-      const newCat = prompt("Enter new name for category:", cat);
-      if (newCat && newCat.trim() && newCat !== cat) renameCategory(cat, newCat.trim());
-    }
-
-    function renderLists() {
-      const searchTerm = (searchInput.value || "").toLowerCase();
-      const selectedCat = filterCategory.value;
-
-      function matches(item) {
-        const name = (item.name || "").toLowerCase();
-        const comment = (item.comment || "").toLowerCase();
-        const matchSearch = name.includes(searchTerm) || comment.includes(searchTerm);
-        const matchCat = selectedCat ? item.category === selectedCat : true;
-        return matchSearch && matchCat;
-      }
-
-      // Rated
-      ratedListEl.innerHTML = "";
-      ratedItems.filter(matches).forEach(item => {
-        const div = document.createElement("div");
-        div.className = "card";
-        const content = document.createElement("div");
-        content.innerHTML = `<strong>${escapeHtml(item.name)}</strong> (${escapeHtml(item.category)})<br>
-                             <span class="rating">${escapeHtml(item.rating)}</span><br>
-                             <em>${escapeHtml(item.comment || "")}</em>`;
-        const actions = document.createElement("div");
-        actions.className = "actions";
-        const editBtn = document.createElement("button");
-        editBtn.className = "edit-btn";
-        editBtn.textContent = "✏️ Edit";
-        editBtn.addEventListener("click", () => editItem("rated", item.id));
-        const deleteBtn = document.createElement("button");
-        deleteBtn.className = "delete-btn";
-        deleteBtn.textContent = "❌ Delete";
-        deleteBtn.addEventListener("click", () => deleteItem("rated", item.id));
-        actions.appendChild(editBtn);
-        actions.appendChild(deleteBtn);
-        div.appendChild(content);
-        div.appendChild(actions);
-        ratedListEl.appendChild(div);
-      });
-
-      // Want
-      wantListEl.innerHTML = "";
-      wantItems.filter(matches).forEach(item => {
-        const div = document.createElement("div");
-        div.className = "card";
-        const content = document.createElement("div");
-        content.innerHTML = `<strong>${escapeHtml(item.name)}</strong> (${escapeHtml(item.category)})<br>
-                             <em>${escapeHtml(item.comment || "")}</em>`;
-        const actions = document.createElement("div");
-        actions.className = "actions";
-        const editBtn = document.createElement("button");
-        editBtn.className = "edit-btn";
-        editBtn.textContent = "✏️ Edit";
-        editBtn.addEventListener("click", () => editItem("want", item.id));
-        const deleteBtn = document.createElement("button");
-        deleteBtn.className = "delete-btn";
-        deleteBtn.textContent = "❌ Delete";
-        deleteBtn.addEventListener("click", () => deleteItem("want", item.id));
-        actions.appendChild(editBtn);
-        actions.appendChild(deleteBtn);
-        div.appendChild(content);
-        div.appendChild(actions);
-        wantListEl.appendChild(div);
-      });
-    }
-
-    function renderCategoryManager() {
-      categoryManager.innerHTML = "";
-      categories.forEach(cat => {
-        const div = document.createElement("div");
-        div.className = "card";
-        const title = document.createElement("strong");
-        title.textContent = cat;
-        const actions = document.createElement("div");
-        actions.className = "actions";
-        const renameBtn = document.createElement("button");
-        renameBtn.className = "cat-btn";
-        renameBtn.textContent = "✏️ Rename";
-        renameBtn.addEventListener("click", () => promptRename(cat));
-        const deleteBtn = document.createElement("button");
-        deleteBtn.className = "delete-btn";
-        deleteBtn.textContent = "❌ Delete";
-        deleteBtn.addEventListener("click", () => deleteCategory(cat));
-        actions.appendChild(renameBtn);
-        actions.appendChild(deleteBtn);
-        div.appendChild(title);
-        div.appendChild(actions);
-        categoryManager.appendChild(div);
-      });
-    }
-
-    function clearFilters() {
-      searchInput.value = "";
-      filterCategory.value = "";
-      renderLists();
-    }
-
-    // simple HTML escape to avoid injection in innerHTML usage
-    function escapeHtml(str) {
-      return String(str || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
-    }
-
-    // wire up
-    saveBtn.addEventListener("click", saveItem);
-    clearFiltersBtn.addEventListener("click", clearFilters);
-    searchInput.addEventListener("input", renderLists);
-    filterCategory.addEventListener("change", renderLists);
-
-    // init UI
-    updateCategoryDropdown();
     renderLists();
-  </script>
+  }
+
+  function editItem(type, id) {
+    let item = (type === "rated" ? ratedItems : wantItems).find(i => i.id === id);
+    if (!item) return alert("Item not found.");
+
+    document.getElementById("itemName").value = item.name;
+    document.getElementById("comment").value = item.comment || "";
+    document.getElementById("rating").value = item.rating || "";
+    newTagInput.value = "";
+    Array.from(existingTagsSelect.options).forEach(o => o.selected = item.tags.includes(o.value));
+
+    editId = id;
+    editType = type;
+    document.getElementById("formTitle").textContent = "Edit Item";
+  }
+
+  function deleteItem(type, id) {
+    if (type === "rated") ratedItems = ratedItems.filter(i => i.id !== id);
+    else wantItems = wantItems.filter(i => i.id !== id);
+    localStorage.setItem("ratedItems", JSON.stringify(ratedItems));
+    localStorage.setItem("wantItems", JSON.stringify(wantItems));
+    renderLists();
+  }
+
+  function renderLists() {
+    function escapeHtml(text) {
+      return text.replace(/[&<>"']/g, function(m) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; });
+    }
+
+    function renderList(el, items, type) {
+      el.innerHTML = "";
+      items.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "card";
+        div.innerHTML = `<strong>${escapeHtml(item.name)}</strong><br>
+          ${item.tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join(" ")}<br>
+          ${item.rating ? `<span class="rating">${escapeHtml(item.rating)}</span><br>` : ""}
+          <em>${escapeHtml(item.comment || "")}</em>`;
+        const actions = document.createElement("div");
+        actions.className = "actions";
+        const editBtn = document.createElement("button");
+        editBtn.className = "edit-btn";
+        editBtn.textContent = "✏️ Edit";
+        editBtn.addEventListener("click", () => editItem(type, item.id));
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "delete-btn";
+        deleteBtn.textContent = "🗑 Delete";
+        deleteBtn.addEventListener("click", () => deleteItem(type, item.id));
+        actions.appendChild(editBtn);
+        actions.appendChild(deleteBtn);
+        div.appendChild(actions);
+        el.appendChild(div);
+      });
+    }
+
+    renderList(ratedListEl, ratedItems, "rated");
+    renderList(wantListEl, wantItems, "want");
+  }
+
+  saveBtn.addEventListener("click", saveItem);
+
+  renderLists();
+  renderTagDropdown();
+</script>
 </body>
 </html>
